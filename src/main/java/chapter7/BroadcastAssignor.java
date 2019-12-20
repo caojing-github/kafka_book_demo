@@ -18,24 +18,24 @@ public class BroadcastAssignor extends AbstractPartitionAssignor {
     }
 
     private Map<String, List<String>> consumersPerTopic(
-            Map<String, Subscription> consumerMetadata) {
+        Map<String, Subscription> consumerMetadata) {
         //(具体实现请参考 RandomAssignor 中的 consumersPerTopic()方法)
         return null;
     }
 
     @Override
     public Map<String, List<TopicPartition>> assign(
-            Map<String, Integer> partitionsPerTopic,
-            Map<String, Subscription> subscriptions) {
+        Map<String, Integer> partitionsPerTopic,
+        Map<String, Subscription> subscriptions) {
         Map<String, List<String>> consumersPerTopic =
-                consumersPerTopic(subscriptions);
+            consumersPerTopic(subscriptions);
         Map<String, List<TopicPartition>> assignment = new HashMap<>();
         //Java8
         subscriptions.keySet().forEach(memberId ->
-                assignment.put(memberId, new ArrayList<>()));
+            assignment.put(memberId, new ArrayList<>()));
 
         //针对每一个主题，为每一个订阅的消费者分配所有的分区
-        consumersPerTopic.entrySet().forEach(topicEntry->{
+        consumersPerTopic.entrySet().forEach(topicEntry -> {
             String topic = topicEntry.getKey();
             List<String> members = topicEntry.getValue();
 
@@ -46,7 +46,7 @@ public class BroadcastAssignor extends AbstractPartitionAssignor {
                 .partitions(topic, numPartitionsForTopic);
             if (!partitions.isEmpty()) {
                 members.forEach(memberId ->
-                        assignment.get(memberId).addAll(partitions));
+                    assignment.get(memberId).addAll(partitions));
             }
         });
         return assignment;

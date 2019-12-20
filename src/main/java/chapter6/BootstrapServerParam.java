@@ -5,12 +5,12 @@ import org.apache.kafka.common.Node;
 import org.apache.kafka.common.protocol.Errors;
 import org.apache.kafka.common.requests.MetadataResponse;
 
-import static org.apache.kafka.common.requests.MetadataResponse.TopicMetadata;
-import static org.apache.kafka.common.requests.MetadataResponse.PartitionMetadata;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static org.apache.kafka.common.requests.MetadataResponse.PartitionMetadata;
+import static org.apache.kafka.common.requests.MetadataResponse.TopicMetadata;
 
 /**
  * Created by 朱小厮 on 2019-03-02.

@@ -19,10 +19,6 @@
         </developer>
     </developers>
 
-    <description>
-        欢迎关注微信公众号：朱小厮的博客
-    </description>
-
     <properties>
         <scala.version>2.11</scala.version>
         <slf4j.version>1.7.21</slf4j.version>

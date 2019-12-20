@@ -21,13 +21,13 @@ public class ConsumerTTL {
     public static void main(String[] args) {
         Properties props = new Properties();
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class.getName());
+            StringDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class.getName());
+            StringDeserializer.class.getName());
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG,
-                ConsumerInterceptorTTL.class.getName());
+            ConsumerInterceptorTTL.class.getName());
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
         consumer.subscribe(Collections.singletonList(topic));

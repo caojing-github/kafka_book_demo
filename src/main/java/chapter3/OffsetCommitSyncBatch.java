@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Created by 朱小厮 on 2018/7/29.
  */
 public class OffsetCommitSyncBatch {
+
     public static final String brokerList = "localhost:9092";
     public static final String topic = "topic-demo";
     public static final String groupId = "group.demo";
@@ -23,10 +24,8 @@ public class OffsetCommitSyncBatch {
 
     public static Properties initConfig() {
         Properties props = new Properties();
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class.getName());
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class.getName());
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -35,12 +34,14 @@ public class OffsetCommitSyncBatch {
     }
 
     public static void main(String[] args) {
+
         Properties props = initConfig();
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
         consumer.subscribe(Arrays.asList(topic));
 
         final int minBatchSize = 200;
         List<ConsumerRecord> buffer = new ArrayList<>();
+
         while (running.get()) {
             ConsumerRecords<String, String> records = consumer.poll(1000);
             for (ConsumerRecord<String, String> record : records) {

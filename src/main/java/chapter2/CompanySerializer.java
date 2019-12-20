@@ -32,8 +32,7 @@ public class CompanySerializer implements Serializer<Company> {
             } else {
                 address = new byte[0];
             }
-            ByteBuffer buffer = ByteBuffer.
-                    allocate(4 + 4 + name.length + address.length);
+            ByteBuffer buffer = ByteBuffer.allocate(4 + 4 + name.length + address.length);
             buffer.putInt(name.length);
             buffer.put(name);
             buffer.putInt(address.length);

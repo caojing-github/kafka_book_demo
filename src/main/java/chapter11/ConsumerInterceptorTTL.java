@@ -18,14 +18,14 @@ import java.util.Map;
  * Created by 朱小厮 on 2018/8/1.
  */
 public class ConsumerInterceptorTTL implements
-        ConsumerInterceptor<String, String> {
+    ConsumerInterceptor<String, String> {
 
     @Override
     public ConsumerRecords<String, String> onConsume(
-            ConsumerRecords<String, String> records) {
+        ConsumerRecords<String, String> records) {
         long now = System.currentTimeMillis();
         Map<TopicPartition, List<ConsumerRecord<String, String>>> newRecords
-                = new HashMap<>();
+            = new HashMap<>();
         for (TopicPartition tp : records.partitions()) {
             List<ConsumerRecord<String, String>> tpRecords = records.records(tp);
             List<ConsumerRecord<String, String>> newTpRecords = new ArrayList<>();

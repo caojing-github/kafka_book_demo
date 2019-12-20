@@ -10,21 +10,23 @@ import java.util.concurrent.ExecutionException;
  * Created by 朱小厮 on 2018/7/21.
  */
 public class KafkaAdminTopicOperation {
+
     public static final String brokerList = "localhost:9092";
     public static final String topic = "topic-admin";
 
-    public static void describeTopic(){
-        String brokerList =  "localhost:9092";
+    public static void describeTopic() {
+        String brokerList = "localhost:9092";
         String topic = "topic-admin";
 
         Properties props = new Properties();
         props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
         props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
+
         AdminClient client = AdminClient.create(props);
 
         DescribeTopicsResult result = client.describeTopics(Collections.singleton(topic));
         try {
-            Map<String, TopicDescription> descriptionMap =  result.all().get();
+            Map<String, TopicDescription> descriptionMap = result.all().get();
             System.out.println(descriptionMap.get(topic));
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
@@ -32,21 +34,32 @@ public class KafkaAdminTopicOperation {
         client.close();
     }
 
+    /**
+     * 使用 KafkaAdminClient 创建一个分区数为4，副本因子为1的主题
+     */
     public static void createTopic() {
-        String brokerList =  "localhost:9092";
+
+        String brokerList = "localhost:9092";
         String topic = "topic-admin";
 
         Properties props = new Properties();
         props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
         props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
+
         AdminClient client = AdminClient.create(props);
 
+        /**
+         * 通过指定分区数和副本因子来创建
+         */
 //        NewTopic newTopic = new NewTopic(topic, 4, (short) 1);
-
+//
 //        Map<String, String> configs = new HashMap<>();
 //        configs.put("cleanup.policy", "compact");
 //        newTopic.configs(configs);
 
+        /**
+         * 通过指定区副本的具体分配方案来创建
+         */
         Map<Integer, List<Integer>> replicasAssignments = new HashMap<>();
         replicasAssignments.put(0, Arrays.asList(0));
         replicasAssignments.put(1, Arrays.asList(0));
@@ -55,9 +68,10 @@ public class KafkaAdminTopicOperation {
 
         NewTopic newTopic = new NewTopic(topic, replicasAssignments);
 
-        //代码清单4-4 可以从这里跟进去
-        CreateTopicsResult result = client.
-                createTopics(Collections.singleton(newTopic));
+        /**
+         * 代码清单4-4 可以从这里跟进去
+         */
+        CreateTopicsResult result = client.createTopics(Collections.singleton(newTopic));
         try {
             result.all().get();
         } catch (InterruptedException | ExecutionException e) {
@@ -66,13 +80,14 @@ public class KafkaAdminTopicOperation {
         client.close();
     }
 
-    public static void deleteTopic(){
-        String brokerList =  "localhost:9092";
+    public static void deleteTopic() {
+        String brokerList = "localhost:9092";
         String topic = "topic-admin";
 
         Properties props = new Properties();
         props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
         props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
+
         AdminClient client = AdminClient.create(props);
 
         try {

@@ -11,20 +11,20 @@ import java.util.Arrays;
 import java.util.Properties;
 
 /**
- * 代码清单 3-11
+ * 代码清单 3-11 第一种多线程消费实现方式
+ * 线程封闭，即为每个线程实例化一个KafkaConsumer对象
  * Created by 朱小厮 on 2018/8/25.
  */
 public class FirstMultiConsumerThreadDemo {
+
     public static final String brokerList = "localhost:9092";
     public static final String topic = "topic-demo";
     public static final String groupId = "group.demo";
 
     public static Properties initConfig() {
         Properties props = new Properties();
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class.getName());
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class.getName());
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
@@ -32,14 +32,20 @@ public class FirstMultiConsumerThreadDemo {
     }
 
     public static void main(String[] args) {
+
         Properties props = initConfig();
         int consumerThreadNum = 4;
+
         for (int i = 0; i < consumerThreadNum; i++) {
             new KafkaConsumerThread(props, topic).start();
         }
     }
 
+    /**
+     * 消费线程
+     */
     public static class KafkaConsumerThread extends Thread {
+
         private KafkaConsumer<String, String> kafkaConsumer;
 
         public KafkaConsumerThread(Properties props, String topic) {
@@ -51,8 +57,7 @@ public class FirstMultiConsumerThreadDemo {
         public void run() {
             try {
                 while (true) {
-                    ConsumerRecords<String, String> records =
-                            kafkaConsumer.poll(Duration.ofMillis(100));
+                    ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(100));
                     for (ConsumerRecord<String, String> record : records) {
                         //process record.
                         System.out.println(record.value());

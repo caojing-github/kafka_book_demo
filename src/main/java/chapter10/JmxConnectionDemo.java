@@ -19,12 +19,12 @@ public class JmxConnectionDemo {
         this.ipAndPort = ipAndPort;
     }
 
-    public boolean init(){
+    public boolean init() {
         jmxURL = "service:jmx:rmi:///jndi/rmi://" + ipAndPort + "/jmxrmi";
         try {
             JMXServiceURL serviceURL = new JMXServiceURL(jmxURL);
             JMXConnector connector = JMXConnectorFactory
-                    .connect(serviceURL, null);
+                .connect(serviceURL, null);
             conn = connector.getMBeanServerConnection();
             if (conn == null) {
                 return false;
@@ -36,10 +36,9 @@ public class JmxConnectionDemo {
     }
 
 
-
     public double getMsgInPerSec() {
         String objectName = "kafka.server:type=BrokerTopicMetrics," +
-                "name=MessagesInPerSec";
+            "name=MessagesInPerSec";
         Object val = getAttribute(objectName, "OneMinuteRate");
         if (val != null) {
             return (double) (Double) val;
@@ -53,8 +52,8 @@ public class JmxConnectionDemo {
             objectName = new ObjectName(objName);
             return conn.getAttribute(objectName, objAttr);
         } catch (MalformedObjectNameException | IOException |
-                ReflectionException | InstanceNotFoundException |
-                AttributeNotFoundException | MBeanException e) {
+            ReflectionException | InstanceNotFoundException |
+            AttributeNotFoundException | MBeanException e) {
             e.printStackTrace();
         }
         return null;
@@ -62,7 +61,7 @@ public class JmxConnectionDemo {
 
     public static void main(String[] args) {
         JmxConnectionDemo jmxConnectionDemo =
-                new JmxConnectionDemo("localhost:9999");
+            new JmxConnectionDemo("localhost:9999");
         jmxConnectionDemo.init();
         System.out.println(jmxConnectionDemo.getMsgInPerSec());
     }

@@ -15,27 +15,27 @@ import java.util.concurrent.TimeUnit;
  * Created by 朱小厮 on 2018/7/19.
  */
 public class KafkaProducerDemo {
+
     public static final String brokerList = "localhost:9092";
     public static final String topic = "topic-spark";
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException{
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+
         Properties properties = new Properties();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
         properties.put(ProducerConfig.CLIENT_ID_CONFIG, "spark-producer-demo-client");
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
-        Producer<String,String> producer = new KafkaProducer<>(properties);
-
+        Producer<String, String> producer = new KafkaProducer<>(properties);
         Random random = new Random();
+
         while (true) {
             int value = random.nextInt(10);
-            ProducerRecord<String, String> message =
-                    new ProducerRecord<>(topic, value+"");
+            ProducerRecord<String, String> message = new ProducerRecord<>(topic, value + "");
             producer.send(message, (recordMetadata, e) -> {
                 if (recordMetadata != null) {
-                    System.out.println(recordMetadata.topic() + "-" + recordMetadata.partition() + ":" +
-                            recordMetadata.offset());
+                    System.out.println(recordMetadata.topic() + "-" + recordMetadata.partition() + ":" + recordMetadata.offset());
                 }
             });
             TimeUnit.SECONDS.sleep(1);

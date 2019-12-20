@@ -1,34 +1,31 @@
 package chapter3;
 
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.time.Duration;
-import java.util.Collections;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 代码清单3-12
+ * 代码清单3-12 第三种多线程消费实现方式
  * Created by 朱小厮 on 2018/8/25.
  */
 public class ThirdMultiConsumerThreadDemo {
+
     public static final String brokerList = "localhost:9092";
     public static final String topic = "topic-demo";
     public static final String groupId = "group.demo";
+    public static Map<TopicPartition, OffsetAndMetadata> offsets = new HashMap<>();
 
     public static Properties initConfig() {
         Properties props = new Properties();
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class.getName());
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                StringDeserializer.class.getName());
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
@@ -37,12 +34,15 @@ public class ThirdMultiConsumerThreadDemo {
 
     public static void main(String[] args) {
         Properties props = initConfig();
-        KafkaConsumerThread consumerThread = new KafkaConsumerThread(props, topic,
-                Runtime.getRuntime().availableProcessors());
+        KafkaConsumerThread consumerThread = new KafkaConsumerThread(props, topic, Runtime.getRuntime().availableProcessors());
         consumerThread.start();
     }
 
+    /**
+     * 消费线程
+     */
     public static class KafkaConsumerThread extends Thread {
+
         private KafkaConsumer<String, String> kafkaConsumer;
         private ExecutorService executorService;
         private int threadNumber;
@@ -51,19 +51,29 @@ public class ThirdMultiConsumerThreadDemo {
             kafkaConsumer = new KafkaConsumer<>(props);
             kafkaConsumer.subscribe(Collections.singletonList(topic));
             this.threadNumber = threadNumber;
+
+            /**
+             * CallerRunsPolicy来者不拒策略
+             * 如果有要执行的任务队列已满,此时若还有任务提交且线程池还没有停止,则直接运行任务的run方法
+             * 参考：https://segmentfault.com/a/1190000009111732
+             */
             executorService = new ThreadPoolExecutor(threadNumber, threadNumber,
-                    0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(1000),
-                    new ThreadPoolExecutor.CallerRunsPolicy());
+                0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(1000),
+                new ThreadPoolExecutor.CallerRunsPolicy());
         }
 
         @Override
         public void run() {
             try {
                 while (true) {
-                    ConsumerRecords<String, String> records =
-                            kafkaConsumer.poll(Duration.ofMillis(100));
+                    ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(100));
                     if (!records.isEmpty()) {
                         executorService.submit(new RecordsHandler(records));
+                    }
+
+                    synchronized (offsets) {
+                        kafkaConsumer.commitSync(offsets);
+                        offsets.clear();
                     }
                 }
             } catch (Exception e) {
@@ -75,7 +85,11 @@ public class ThirdMultiConsumerThreadDemo {
 
     }
 
+    /**
+     * 处理消息
+     */
     public static class RecordsHandler extends Thread {
+
         public final ConsumerRecords<String, String> records;
 
         public RecordsHandler(ConsumerRecords<String, String> records) {
@@ -85,8 +99,29 @@ public class ThirdMultiConsumerThreadDemo {
         @Override
         public void run() {
             //处理records.
-            for (ConsumerRecord<String, String> record : records) {
-                System.out.println(record.value());
+//            for (ConsumerRecord<String, String> record : records) {
+//                System.out.println(record.value());
+//            }
+
+            for (TopicPartition partition : records.partitions()) {
+                List<ConsumerRecord<String, String>> partitionRecords = records.records(partition);
+
+                for (ConsumerRecord<String, String> record : partitionRecords) {
+                    //do some logical processing.
+                }
+
+                long lastConsumedOffset = partitionRecords.get(partitionRecords.size() - 1).offset();
+
+                synchronized (offsets) {
+                    if (!offsets.containsKey(partition)) {
+                        offsets.put(partition, new OffsetAndMetadata(lastConsumedOffset + 1));
+                    } else {
+                        long position = offsets.get(partition).offset();
+                        if (position < lastConsumedOffset + 1) {
+                            offsets.put(partition, new OffsetAndMetadata(lastConsumedOffset + 1));
+                        }
+                    }
+                }
             }
         }
     }

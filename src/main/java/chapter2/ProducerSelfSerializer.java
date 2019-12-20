@@ -13,28 +13,25 @@ import java.util.concurrent.ExecutionException;
  * Created by 朱小厮 on 2018/7/26.
  */
 public class ProducerSelfSerializer {
+
     public static final String brokerList = "localhost:9092";
     public static final String topic = "topic-demo";
 
-    public static void main(String[] args)
-            throws ExecutionException, InterruptedException {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+
         Properties properties = new Properties();
-        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-                StringSerializer.class.getName());
-        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                CompanySerializer.class.getName());
-//        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-//                ProtostuffSerializer.class.getName());
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, CompanySerializer.class.getName());
+//        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ProtostuffSerializer.class.getName());
         properties.put("bootstrap.servers", brokerList);
 
-        KafkaProducer<String, Company> producer =
-                new KafkaProducer<>(properties);
-        Company company = Company.builder().name("hiddenkafka")
-                .address("China").build();
+        KafkaProducer<String, Company> producer = new KafkaProducer<>(properties);
+
+        Company company = Company.builder().name("hiddenkafka").address("China").build();
+
 //        Company company = Company.builder().name("hiddenkafka")
 //                .address("China").telphone("13000000000").build();
-        ProducerRecord<String, Company> record =
-                new ProducerRecord<>(topic, company);
+        ProducerRecord<String, Company> record = new ProducerRecord<>(topic, company);
         producer.send(record).get();
     }
 }

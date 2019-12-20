@@ -12,7 +12,7 @@ public class RandomAssignor extends AbstractPartitionAssignor {
     @Override
     public Map<String, List<TopicPartition>> assign(Map<String, Integer> partitionsPerTopic, Map<String, Subscription> subscriptions) {
         Map<String, List<String>> consumersPerTopic =
-                consumersPerTopic(subscriptions);
+            consumersPerTopic(subscriptions);
         Map<String, List<TopicPartition>> assignment = new HashMap<>();
         for (String memberId : subscriptions.keySet()) {
             assignment.put(memberId, new ArrayList<>());
@@ -20,7 +20,7 @@ public class RandomAssignor extends AbstractPartitionAssignor {
 
         //针对每一个主题进行分区分配
         for (Map.Entry<String, List<String>> topicEntry :
-                consumersPerTopic.entrySet()) {
+            consumersPerTopic.entrySet()) {
             String topic = topicEntry.getKey();
             List<String> consumersForTopic = topicEntry.getValue();
             int consumerSize = consumersForTopic.size();
@@ -31,7 +31,7 @@ public class RandomAssignor extends AbstractPartitionAssignor {
 
             //当前主题下的所有分区
             List<TopicPartition> partitions =
-                    AbstractPartitionAssignor.partitions(topic,
+                AbstractPartitionAssignor.partitions(topic,
                     numPartitionsForTopic);
             //将每个分区随机分配给一个消费者
             for (TopicPartition partition : partitions) {
@@ -48,7 +48,7 @@ public class RandomAssignor extends AbstractPartitionAssignor {
         return "name";
     }
 
-    private Map<String,List<String>> consumersPerTopic(Map<String,Subscription> consumerMetadata){
+    private Map<String, List<String>> consumersPerTopic(Map<String, Subscription> consumerMetadata) {
         Map<String, List<String>> res = new HashMap<>();
         for (Map.Entry<String, Subscription> subscriptionEntry : consumerMetadata.entrySet()) {
             String consumerId = subscriptionEntry.getKey();
