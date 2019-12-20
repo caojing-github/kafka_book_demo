@@ -14,7 +14,7 @@ import java.util.Optional;
 
 
 /**
- * 代码清单10-3
+ * 代码清单10-3 直接调用 ConsumerGroupCommand 实现
  * Created by 朱小厮 on 2018/10/22.
  */
 public class KafkaConsumerGroupAnother {

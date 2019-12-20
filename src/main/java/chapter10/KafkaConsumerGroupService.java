@@ -19,7 +19,7 @@ import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 
 /**
- * 代码清单10-2
+ * 代码清单10-2 消息堆积计算示例
  * Created by 朱小厮 on 2018/10/21.
  */
 @Slf4j
